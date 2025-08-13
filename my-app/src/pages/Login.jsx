@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -7,34 +8,37 @@ const Login = () => {
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
 
-
-
   const handleInput = (e) => {
     const { name, value } = e.target;
     if (name === "email") setEmail(value);
     if (name === "password") setPassword(value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (email === "" || password === "") {
       setMsg("Please fill all fields");
       return;
     }
-    
 
-    const users = JSON.parse(localStorage.getItem("user") || "[]");
-    const user = users.find(
-      (cur) => cur.email === email && cur.password === password
-    );
+    try {
+      const res = await axios.post("http://localhost:5000/api/user/login", {
+        email,
+        password,
+      });
 
-    if (user) {
-      setMsg("");
       alert("Login successful");
+      setMsg("");
+      // If needed, you can save token to localStorage
+      // localStorage.setItem("token", res.data.token);
       navigate("/");
-    } else {
-      setMsg("Invalid credentials");
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.msg) {
+        setMsg(error.response.data.msg);
+      } else {
+        setMsg("Something went wrong. Try again.");
+      }
     }
   };
 
@@ -72,7 +76,6 @@ const Login = () => {
               placeholder="Enter password"
               className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-black transition duration-300"
             />
-            
           </div>
 
           <button
