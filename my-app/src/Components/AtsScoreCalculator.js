@@ -9,9 +9,9 @@ function AtsScoreCalculator() {
     const navigate = useNavigate();
 
   const handleCalculateAtsScore = async () => {
-  const user = localStorage.getItem("user");
+  const loggedInUser = localStorage.getItem("loggedInUser");
 
-  if (!user) {
+  if (!loggedInUser) {
     alert("Please log in to use the ATS score feature.");
     navigate("/login"); // Make sure `useNavigate` is imported
     return;
