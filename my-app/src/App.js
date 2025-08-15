@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 // import Analyzer from "./pages/Analyzer";
 import AnalysisPage from "./pages/AnalysisPage";
+import AtsScoreCalculator from "./Components/AtsScoreCalculator";
 
 
 
@@ -29,6 +30,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         {/* <Route path="/analyzer" element={<Analyzer />} /> */}
         <Route path="/analysis" element={<AnalysisPage />} />
+        <Route path="/ats-score-calculator" element={<AtsScoreCalculator />} />
        
       </Routes>
     
@@ -41,6 +43,8 @@ function App() {
   return (
     <Router>
       <AppContent />
+      {/* <AtsScoreCalculator/> */}
+
     </Router>
   );
 }

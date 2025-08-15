@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,31 +13,29 @@ const Login = () => {
     if (name === "password") setPassword(value);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (email === "" || password === "") {
+    if (!email || !password) {
       setMsg("Please fill all fields");
       return;
     }
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/user/login", {
-        email,
-        password,
-      });
+    // Get stored users
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
 
+    if (user) {
       alert("Login successful");
       setMsg("");
-      // If needed, you can save token to localStorage
-      // localStorage.setItem("token", res.data.token);
+      // Store login state
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+      window.dispatchEvent(new Event("auth-changed")); // notify app
       navigate("/");
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data.msg) {
-        setMsg(error.response.data.msg);
-      } else {
-        setMsg("Something went wrong. Try again.");
-      }
+    } else {
+      setMsg("Invalid email or password");
     }
   };
 
@@ -49,7 +46,8 @@ const Login = () => {
           🔐 Welcome Back
         </h2>
         <p className="text-sm text-gray-600 text-center mb-6">
-          Sign in to continue your journey with <span className="font-semibold">Sprush</span>.
+          Sign in to continue your journey with{" "}
+          <span className="font-semibold">Sprush</span>.
         </p>
 
         {msg && (

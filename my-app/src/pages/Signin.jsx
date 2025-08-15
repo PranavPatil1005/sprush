@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -21,10 +20,10 @@ const Signup = () => {
     if (name === "password") setPassword(value);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (email === "" || password === "") {
+    if (!email || !password) {
       setMsg("Please fill all fields");
       return;
     }
@@ -34,27 +33,24 @@ const Signup = () => {
       return;
     }
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/user/signup", {
-        email,
-        password,
-      });
+    // Store in localStorage
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const existingUser = users.find((u) => u.email === email);
 
-      if (res.status === 201) {
-        alert("Signup successful");
-        navigate("/login");
-      }
-    } catch (err) {
-      if (err.response && err.response.data && err.response.data.msg) {
-        setMsg(err.response.data.msg);
-      } else {
-        setMsg("Something went wrong. Please try again.");
-      }
+    if (existingUser) {
+      setMsg("User already exists. Please login.");
+      return;
     }
+
+    users.push({ email, password });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Signup successful!");
+    navigate("/login");
   };
 
   const handleGoogleSignup = () => {
-    alert("In a real application, this would redirect to Google for authentication.");
+    alert("Google signup would happen here in a real app.");
   };
 
   return (
@@ -108,7 +104,11 @@ const Signup = () => {
           onClick={handleGoogleSignup}
           className="w-full mt-4 py-3 bg-white border border-gray-300 text-black rounded-md hover:bg-gray-100 font-medium transition-transform duration-300 hover:scale-[1.02] flex items-center justify-center space-x-2"
         >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5" />
+          <img
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            alt="Google"
+            className="h-5 w-5"
+          />
           <span>Sign up with Google</span>
         </button>
 

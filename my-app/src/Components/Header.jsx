@@ -1,14 +1,30 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Header = () => {
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem("user");
+  const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem("loggedInUser")
+  );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Re-check on route changes and on auth events
+  useEffect(() => {
+    const syncAuth = () => setIsLoggedIn(!!localStorage.getItem("loggedInUser"));
+    syncAuth();
+    window.addEventListener("storage", syncAuth);
+    window.addEventListener("auth-changed", syncAuth);
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+      window.removeEventListener("auth-changed", syncAuth);
+    };
+  }, [location.pathname]);
+
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/signup");
+    localStorage.removeItem("loggedInUser");
+    window.dispatchEvent(new Event("auth-changed")); // notify app
+    navigate("/login");
   };
 
   return (
@@ -33,28 +49,19 @@ const Header = () => {
             isMenuOpen ? "block" : "hidden"
           } absolute top-[75px] left-0 w-full bg-white shadow-md px-6 py-4 flex flex-col gap-4 md:gap-6 md:flex-row md:static md:w-auto md:bg-transparent md:shadow-none md:flex md:items-center`}
         >
-          <Link
-            to="/"
-            className="text-[17px] font-medium text-[#333] hover:text-[#007aff] transition"
-          >
+          <Link to="/" className="text-[17px] font-medium text-[#333] hover:text-[#007aff] transition">
             Home
           </Link>
-          <Link
-            to="/about"
-            className="text-[17px] font-medium text-[#333] hover:text-[#007aff] transition"
-          >
+          <Link to="/about" className="text-[17px] font-medium text-[#333] hover:text-[#007aff] transition">
             About
           </Link>
-          <Link
-            to="/contact"
-            className="text-[17px] font-medium text-[#333] hover:text-[#007aff] transition"
-          >
+          <Link to="/contact" className="text-[17px] font-medium text-[#333] hover:text-[#007aff] transition">
             Contact
           </Link>
 
           {!isLoggedIn ? (
             <Link
-              to="/signup"
+              to="/login"  // ✅ was /signup by mistake
               className="px-4 py-2 bg-[#007aff] text-white rounded-md font-medium hover:bg-[#005fcc] transition"
             >
               Sign In

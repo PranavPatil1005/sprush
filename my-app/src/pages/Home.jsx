@@ -13,74 +13,95 @@ const Home = () => {
  setError("");
  };
 
- const handleAnalyze = async () => {
+const handleAnalyze = async () => {
+  // ✅ Check if user is logged in
+  if (!localStorage.getItem("loggedInUser")) {
+    setError("You must be logged in to use the Analyze feature.");
+    navigate("/login"); // redirect to login page
+    return;
+  }
 
- if (!file) {
- setError("Please upload a PDF file first.");
- return;
- }
+  if (!file) {
+    setError("Please upload a PDF file first.");
+    return;
+  }
 
- const formData = new FormData();
- formData.append("resume", file);
+  const formData = new FormData();
+  formData.append("resume", file);
 
- try {
- setLoading(true);
- const res = await axios.post("http://localhost:5000/analyze", formData, {
- headers: { "Content-Type": "multipart/form-data" },
- });
+  try {
+    setLoading(true);
+    const res = await axios.post("http://localhost:5000/analyze", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
- if (res.data.success) {
- navigate("/analysis", {
- state: {
- suggestions: res.data.feedback,
- fileName: res.data.fileName,
- },
- });
- } else {
- setError("Analysis failed. Try again.");
- }
- } catch (err) {
- console.error(err);
- setError("Something went wrong. Check your server.");
- } finally {
- setLoading(false);
- }
- };
+    if (res.data.success) {
+      navigate("/analysis", {
+        state: {
+          suggestions: res.data.feedback,
+          fileName: res.data.fileName,
+        },
+      });
+    } else {
+      setError("Analysis failed. Try again.");
+    }
+  } catch (err) {
+    console.error(err);
+    setError("Something went wrong. Check your server.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
 return (
   <div className="bg-white min-h-screen">
     {/* Hero Section */}
-    <section className="text-center py-16 px-6 max-w-3xl mx-auto">
-      <h1 className="text-6xl font-bold mb-3 text-gray-800">
-        Your resume, Reimagined.
-      </h1>
-      <p className="text-lg text-gray-600 mb-8">
-        Get noticed, shortlisted, hired — faster.
-      </p>
-      <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-4 hover:scale-105 transition-transform duration-200 ease-in-out">
-        <input
-          type="file"
-          accept=".pdf"
-          onChange={handleFileChange}
-          className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-          file:rounded-full file:border-0
-          file:text-sm file:font-semibold
-          file:bg-gray-200 file:text-black
-          hover:file:bg-gray-300"
-        />
-      </div>
-      <button
-        onClick={handleAnalyze}
-        disabled={loading}
-        className="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded hover:bg-gray-300 disabled:opacity-50"
-      >
-        {loading ? "Analyzing..." : "Analyze My Resume"}
-      </button>
-      {error && (
-        <p className="text-red-400 mt-4">{error}</p>
-      )}
-    </section>
+   <section className="text-center py-16 px-6 max-w-3xl mx-auto">
+  <h1 className="text-6xl font-bold mb-3 text-gray-800">
+    Your resume, Reimagined.
+  </h1>
+  <p className="text-lg text-gray-600 mb-8">
+    Get noticed, shortlisted, hired — faster.
+  </p>
+
+  {/* File Upload */}
+  <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-4 hover:scale-105 transition-transform duration-200 ease-in-out">
+    <input
+      type="file"
+      accept=".pdf"
+      onChange={handleFileChange}
+      className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+        file:rounded-full file:border-0
+        file:text-sm file:font-semibold
+        file:bg-gray-200 file:text-black
+        hover:file:bg-gray-300"
+    />
+  </div>
+
+  {/* Analyze Resume Button */}
+  <button
+    onClick={handleAnalyze}
+    disabled={loading}
+    className="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded hover:bg-gray-300 disabled:opacity-50"
+  >
+    {loading ? "Analyzing..." : "Analyze My Resume"}
+  </button>
+
+  {/* ATS Score Button */}
+  <button
+    onClick={() => navigate("/ats-score-calculator")}// You need to define this function
+    className="px-6 py-3 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 ml-4"
+  >
+    Check your ATS Score
+  </button>
+
+  {error && (
+    <p className="text-red-400 mt-4">{error}</p>
+  )}
+</section>
+
 
     {/* How it Works */}
     <section className="py-12 px-6">
